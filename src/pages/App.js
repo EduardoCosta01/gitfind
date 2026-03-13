@@ -11,8 +11,16 @@ function App() {
 
   const [currentRepo, setCurrentRepo] = useState('');
   const [repos, setRepos] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSearchRepo = async () => {
+
+    if (!currentRepo) {
+      alert('Informe o repositório no formato "usuario/repositorio".');
+      return;
+    }
+
+    setLoading(true);
 
     try {
 
@@ -28,10 +36,15 @@ function App() {
           return
         }
       }
-      
-    }catch (error){
-      alert('Repositório não encontrado');
 
+    }catch (error){
+      if (error.response?.status === 404) {
+        alert('Repositório não encontrado.');
+      } else {
+        alert('Ocorreu um erro ao buscar o repositório. Tente novamente.');
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -45,9 +58,15 @@ function App() {
     <Container>
       
       <img src={gitLogo} width={72} height={72} alt='Logo do Github'/>
-      <Input value = {currentRepo} onChange = {(e) => setCurrentRepo(e.target.value)} />
-      <Button onClick = {handleSearchRepo} />
-      {repos.map(repo => <ItemRepo handleRemoveRepo={handleRemoveRepo} repo = {repo} /> )}
+      <Input value={currentRepo} onChange={(e) => setCurrentRepo(e.target.value)} />
+      <Button onClick={handleSearchRepo} disabled={loading} />
+      {repos.map(repo => (
+        <ItemRepo
+          key={repo.id}
+          handleRemoveRepo={handleRemoveRepo}
+          repo={repo}
+        />
+      ))}
       
     
     </Container>
